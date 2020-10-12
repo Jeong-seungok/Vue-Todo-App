@@ -1,0 +1,4 @@
+// 숨김파일
+{
+    "presets": ["@babel/preset-env"]
+}
