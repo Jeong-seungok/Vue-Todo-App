@@ -58,6 +58,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.11.5",
+    "crypto-random-string": "^3.3.0",
     "lodash": "^4.17.20",
     "lowdb": "^1.0.0",
     "requirejs": "^2.3.6",
