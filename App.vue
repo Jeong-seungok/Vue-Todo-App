@@ -10,3 +10,15 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+    body{
+        background: #282934;
+        font-size: 20px;
+        button{
+            border: none;
+            background: #fff;
+            color: lightgray;
+            font-size: 20px;
+        }
+    }
+</style>

@@ -1,14 +1,48 @@
 <template>
-    <div>
-        <todo-item 
-        v-for="todo in todos"
-        :key="todo.id"
-        :todo="todo"
-        @update-todo="updateTodo"
-        @delete-mode="deleteMode"/>
-        <!--todo 속성에 todo 값을 props로 전달해주고 TodoItem은 props를 받아서 내부에서 처리함-->
-        <todo-creator @create-todo="createTodo"/>
-        <!--자식 컴포넌트 TodoCreator에서 전달받은 create-todo 이벤트 연결하여 createTodo 메서드 실행-->
+    <div class="todo-app-wrap">
+        <div class="todo-app__action">
+            <!-- 항목 분류 -->
+            <div class="filters">
+                <button
+                    :class="{ active: filter === 'all' }"
+                    @click="changeFilter('all')">
+                    모든 항목 ({{ total }})
+                </button>
+                <button
+                    :class="{ active: filter === 'active' }"
+                    @click="changeFilter('active')">
+                    해야 할 항목 ({{ activeCount }})
+                </button>
+                <button
+                    :class="{ active: filter === 'completed' }"
+                    @click="changeFilter('completed')">
+                    완료된 항목 ({{ completedCount }})
+                </button>
+            </div>
+
+            <!-- 전체 선택 및 완료 항목 삭제 -->
+            <div class="actions">
+                <input 
+                    v-model="allDone"
+                    type="checkbox"/>
+                <button
+                    @click="clearCompleted">완료된 항목 삭제</button>
+            </div>
+        </div>
+
+        <!-- Todo 리스트 -->
+        <div class="todo-app__list">
+            <todo-item 
+                v-for="todo in filteredTodos"
+                :key="todo.id"
+                :todo="todo"
+                @update-todo="updateTodo"
+                @delete-mode="deleteMode"/>
+        </div>
+        <!--todo는 props로 자식컴포넌트에 전달, @upate,delte는 emit으로 자식컴포넌트에서 전달받음-->
+        <todo-creator 
+        @create-todo="createTodo"/>
+        <!--@create는 emit으로 자식컴포넌트에서 전달받음-->
     </div>
 </template>
 
@@ -19,10 +53,13 @@ import cryptoRandomString from 'crypto-random-string'
 import cloneDeep from 'lodash/cloneDeep'
 import _find from 'lodash/find'
 import _assign from 'lodash/assign'
+import _remove from 'lodash/remove'
+import _findIndex from 'lodash/findIndex'
 import TodoCreator from './TodoCreator'
 import TodoItem from './TodoItem'
 
 export default {
+    // 자식 컴포넌트
     components: {
         TodoCreator,
         TodoItem
@@ -30,7 +67,41 @@ export default {
     data () {
         return {
             db: null,
-            todos: []
+            todos: [],
+            filter: 'all'
+        }
+    },
+    computed: {
+        filteredTodos () {
+            switch(this.filter){
+                // 모든 항목
+                case 'all':
+                default:
+                    return this.todos
+                // 해야할 항목
+                case 'active':
+                    return this.todos.filter(todo => !todo.done);
+                // 완료된 항목
+                case 'completed':
+                    return this.todos.filter(todo => todo.done);
+            }
+        },
+        total(){
+            return this.todos.length;
+        },
+        activeCount(){
+            return this.todos.filter(todo => !todo.done).length;
+        },
+        completedCount(){
+            return this.total - this.activeCount;
+        },
+        allDone: {
+            get(){
+                return this.total === this.completedCount && this.total > 0;
+            },
+            set(checked){
+                this.completeAll(checked)
+            }
         }
     },
     // TodoApp.vue가 생성되고 나서 직후, 라이프사이클 훅
@@ -40,27 +111,26 @@ export default {
     methods: {
         // DB 초기화
         initDB () {
-            const adapter = new LocalStorage('todo-app'); // todo-app이라는 이름의 adapter 생성
-            this.db = lowdb(adapter); // lowdb에 adapter를 연결하고 반환되는 값을 this.db에 담는다
+            const adapter = new LocalStorage('todo-app'); // todo-app 이름의 로컬저장소 생성
+            this.db = lowdb(adapter); // lowdb에 todo-app 연결
 
-            // db에서 todos 데이터를 가지고 있는지 확인하고 있다면 값을 가져옴
-            // cloneDeep 메서드로 todos 안의 모든 참조관계까지 가져옴
-            // 복사를 하는 이유는 LocalStorage DB의 데이터가 수정되는 것을 막기 위함
-            const hasTodos = cloneDeep(this.db.has('todos').value());
+            const hasTodos = this.db.has('todos').value();
 
             // todos 데이터가 있는 경우
             if(hasTodos){
-                this.todos = this.db.getState().todos; // db에서 데이터를 받아와서 todos만 반환
+                // DB에서 todos를 가져와 복사함
+                this.todos = cloneDeep(this.db.getState().todos);
             }
             // todos 데이터가 없는 경우
             else{
             this.db
-            .defaults({ // defaults 메서드로 지정하고 싶은 데이터를 설정
-                todos: [] // Collection이라 지칭
+            .defaults({ // 초기값 지정
+                todos: [] // Collection
             })
-            .write() // lowdb에서는 write 메서드를 마지막에 추가해야 실제 DB에 작성된다
+            .write() // lowdb에서는 write 메서드를 마지막에 추가해야 실제 DB에 작성됨
             }
         },
+        
         // Todo 생성
         // 매개변수 title은 TodoCreator 컴포넌트의 this.title이다
         createTodo(title){
@@ -73,25 +143,83 @@ export default {
                 done: false
             }
 
-            // 
+            // DB에 생성
             this.db
             .get('todos') // lodash에서 제공하는 메서드 get,push
             .push(newTodo)
-            .write() // lowdb에서 제공하는 메서드 write(갱신) 필수
+            .write()
+
+            // 클라이언트 화면에 생성
+            this.todos.push(newTodo)
         },
         updateTodo(todo, value){
             this.db
             .get('todos')
             .find({id:todo.id}) // 첫번째 인수로 올 검색할 배열은 위에 get에서 받아오기에 생략 가능
-            .assign(value) // value 객체 데이터를 갱신
+            .assign(value) // value 객체를 해당 todo에 갱신
             .write()
 
             const foundTodo = _find(this.todos, {id: todo.id});
             _assign(foundTodo, value);
         },
-        deleteMode(){
-            
+        deleteMode(todo){
+            this.db
+            .get('todos')
+            .remove({id:todo.id})
+            .write()
+
+            const foundIndex = _findIndex(this.todos, {id: todo.id})
+            this.$delete(this.todos, foundIndex)
+        },
+        changeFilter(filter){
+            this.filter = filter;
+        },
+        completeAll(checked){
+            // DB
+            const newTodos = this.db
+            .get('todos')
+            .forEach(todo => {
+                todo.done = checked;
+            })
+            .write()
+
+            // Local
+            // this.todos.forEach(todo => {
+            //     todo.done = checked;
+            // })
+
+            this.todos = cloneDeep(newTodos); 
+        },
+        clearCompleted(){
+            console.log(this.todos
+            .reduce((list, todo, index)=>{
+                if(todo.done){
+                    list.push(index)
+                }
+                return list
+            }, []));
         }
     }
 }
 </script>
+
+<style lang="scss">
+    .todo-app-wrap{
+        background: #fff;
+        .filters{
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            button{
+                height: 47px;
+            }
+            button.active{
+                font-weight: bold;
+                background: royalblue;
+                color: #fff;
+            }
+        }
+        .actions{
+            padding: 14px;
+        }
+    }
+</style>

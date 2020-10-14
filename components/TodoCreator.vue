@@ -1,6 +1,7 @@
 <template>
-    <div>
+    <div class="create-wrap">
         <button
+        class="create"
         @click="createTodo">추가</button>
         <input type="text"
         :placeholder="placeholdermsg"
@@ -35,3 +36,19 @@ export default {
     }
 }
 </script>
+<style lang="scss">
+.create-wrap{
+    display: flex;
+    padding: 14px;
+    .create{
+        background: royalblue;
+        color: #fff;
+        margin-right: 10px;
+    }
+    input{
+        font-size: 20px;
+        border: none;
+        flex-grow: 1;
+    }
+}
+</style>
