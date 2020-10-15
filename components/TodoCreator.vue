@@ -1,8 +1,8 @@
 <template>
     <div class="create-wrap">
         <button
-        class="create"
-        @click="createTodo">추가</button>
+        class="create icons"
+        @click="createTodo"><i class="material-icons">add</i></button>
         <input type="text"
         :placeholder="placeholdermsg"
         :value="title"
@@ -32,23 +32,12 @@ export default {
             }
             this.$emit('create-todo', this.title) // create-todo는 event 이름, 자식은 부모의 메서드를 가져올 수 없기 때문에 emit 이용(올려주는 개념)
             this.title = '';
+
+            this.$nextTick(()=>{
+                let todoWrap = document.querySelector('.todo-app-wrap');
+                todoWrap.scrollTo(0, todoWrap.scrollHeight);
+            })
         }
     }
 }
 </script>
-<style lang="scss">
-.create-wrap{
-    display: flex;
-    padding: 14px;
-    .create{
-        background: royalblue;
-        color: #fff;
-        margin-right: 10px;
-    }
-    input{
-        font-size: 20px;
-        border: none;
-        flex-grow: 1;
-    }
-}
-</style>

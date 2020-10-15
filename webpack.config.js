@@ -7,21 +7,20 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const { default: merge } = require('webpack-merge')
 require('@babel/polyfill')
 
-module.exports = {
-
-}
-
 module.exports = (env, opts) => { // opts로 개발용인지 제품용인지 구분
   const config = {
     // 개발용, 제품용 모두 중복되는 옵션
     resolve: {
-      extensions: ['.vue', '.js'] // 생략할 확장자명들
+      extensions: ['.vue', '.js'], // 생략할 확장자명들
+      alias: {
+        '~': path.join(__dirname) // 경로 별칭 지정 
+      }
     },
     // 진입점
     entry: {
       app: [
         '@babel/polyfill',
-        path.join(__dirname, 'main.js') // 현재파일의 경로와 main.js를 합하여 app에 추가
+        path.join(__dirname, 'main.js') // 루트 파일 경로의 main.js
       ]
     },
     // 결과물에 대한 설정

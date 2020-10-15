@@ -22,11 +22,23 @@
 
             <!-- 전체 선택 및 완료 항목 삭제 -->
             <div class="actions">
-                <input 
-                    v-model="allDone"
-                    type="checkbox"/>
-                <button
-                    @click="clearCompleted">완료된 항목 삭제</button>
+                <label>
+                    <input 
+                        v-model="allDone"
+                        type="checkbox"/>
+                    <span class="icons"><i class="material-icons">done_all</i></span>
+                </label>
+                <div>
+                    <button 
+                    class="btn"
+                    @click="scrollTop"><i class="material-icons">keyboard_arrow_up</i></button>
+                    <button 
+                    class="btn"
+                    @click="scrollBottom"><i class="material-icons">keyboard_arrow_down</i></button>
+                    <button
+                        class="btn --danger"
+                        @click="clearCompleted"><i class="material-icons">delete_sweep</i></button>
+                </div>
             </div>
         </div>
 
@@ -55,8 +67,9 @@ import _find from 'lodash/find'
 import _assign from 'lodash/assign'
 import _remove from 'lodash/remove'
 import _findIndex from 'lodash/findIndex'
-import TodoCreator from './TodoCreator'
-import TodoItem from './TodoItem'
+import _forEachRight from 'lodash/forEachRight'
+import TodoCreator from '~/components/TodoCreator'
+import TodoItem from '../components/TodoItem'
 
 export default {
     // 자식 컴포넌트
@@ -191,35 +204,36 @@ export default {
             this.todos = cloneDeep(newTodos); 
         },
         clearCompleted(){
-            console.log(this.todos
+            // list: 누적값, todo: 현재값, index: 인덱스
+            /* this.todos
             .reduce((list, todo, index)=>{
                 if(todo.done){
                     list.push(index)
                 }
                 return list
-            }, []));
+            }, [])
+            .reverse()
+            .forEach(index=>{
+                this.deleteMode(this.todos[index]);
+            }) */
+            _forEachRight(this.todos, todo => {
+                if(todo.done){
+                    this.deleteMode(todo);
+                }
+            })
+        },
+        scrollTop(){
+            let todoWrap = document.querySelector('.todo-app-wrap');
+            todoWrap.scrollTo({top:0,left:0,behavior:'smooth'})
+        },
+        scrollBottom(){
+            let todoWrap = document.querySelector('.todo-app-wrap');
+            todoWrap.scrollTo({top:todoWrap.scrollHeight, left:0, behavior:'smooth'})
         }
     }
 }
 </script>
 
 <style lang="scss">
-    .todo-app-wrap{
-        background: #fff;
-        .filters{
-            display: grid;
-            grid-template-columns: repeat(3,1fr);
-            button{
-                height: 47px;
-            }
-            button.active{
-                font-weight: bold;
-                background: royalblue;
-                color: #fff;
-            }
-        }
-        .actions{
-            padding: 14px;
-        }
-    }
+    @import "../scss/style";
 </style>

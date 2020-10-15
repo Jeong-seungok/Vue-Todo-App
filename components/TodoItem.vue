@@ -1,6 +1,6 @@
 <template>
     <div 
-        :class="done"
+        :class="{done}"
         class="todo-items">
         <!-- 수정모드 활성화 -->
         <div 
@@ -15,21 +15,26 @@
                 @keydown.esc="offeditMode">
             <div class="item__actions">
                 <!-- key값으로 다른 엘리먼트 포커싱 방지 -->
-                <button 
+                <button
+                    class="btn --done" 
                     key="complete"
-                    @click="completededit">완료</button>
+                    @click="completededit"><i class="material-icons">done</i></button>
                 <button 
+                    class="btn --clear"
                     key="cancel"
-                    @click="offeditMode">취소</button>
+                    @click="offeditMode"><i class="material-icons">clear</i></button>
             </div>
         </div>
         <!-- 기본 형태 -->
         <div 
             class="item__inner item--normal"
             v-else>
+            <label>
             <input 
                 v-model="done" 
                 type="checkbox" />
+                <span class="icons"><i class="material-icons">check</i></span>
+            </label>
             <!-- 제목 날짜 -->
             <div class="item__title-wrap">
                 <div class="item__title">
@@ -43,11 +48,13 @@
             <div class="item__actions">
                 <!-- key값으로 다른 엘리먼트 포커싱 방지 -->
                 <button 
+                    class="btn"
                     key="update"
-                    @click="editMode">수정</button>
+                    @click="editMode"><i class="material-icons">edit</i></button>
                 <button 
+                    class="btn --danger"
                     key="delete"
-                    @click="deleteTodo">삭제</button>
+                    @click="deleteTodo"><i class="material-icons">delete</i></button>
             </div>
         </div>
     </div>
@@ -125,35 +132,3 @@ export default {
     }
 }
 </script>
-
-<style scoped lang="scss">
-    .todo-items{
-        margin-bottom: 10px;
-        .item__inner{
-            display: flex;
-            align-items: center;
-            padding: 12px 14px;
-            min-height: 44px;
-            input[type="checkbox"]{
-                margin-right: 15px;
-            }
-            input[type="text"]{
-                flex-grow: 1;
-                font-size: 20px;
-                border: none;
-                margin: 0 25px;
-            }
-        }
-        .item__title-wrap{
-            flex-grow: 1;
-        }
-        .item__date{
-            font-size: 12px;
-        }
-        &.done{
-            .item__title{
-                text-decoration: line-through;
-            }
-        }
-    }
-</style>
