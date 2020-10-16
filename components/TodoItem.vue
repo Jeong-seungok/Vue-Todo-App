@@ -124,10 +124,15 @@ export default {
             this.iseditMode = false;
         },
         deleteTodo(){
-            this.$emit('delete-mode', this.todo); // delete-mode 이벤트 이름과 해당 todo를 전달
+            // this.$emit('delete-mode', this.todo); delete-mode 이벤트 이름과 해당 todo를 전달
+            this.$store.dispatch('todoApp/deleteMode', this.todo)
         },
         updateTodo(value){
-            this.$emit('update-todo', this.todo, value); // update-todo 이벤트 이름, 해당 todo, 변경된 객체 전달
+            // this.$emit('update-todo', this.todo, value); update-todo 이벤트 이름, 해당 todo, 변경된 객체 전달
+            this.$store.dispatch('todoApp/updateTodo',{
+                todo: this.todo,
+                value: value
+            })
         }
     }
 }

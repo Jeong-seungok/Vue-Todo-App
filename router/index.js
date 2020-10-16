@@ -10,16 +10,27 @@ Vue.use(VueRouter);
 const routes = [
     //config(설정)
     {
+        name: 'index',
         path: '/', // 최상위 페이지
         component: Home
     },
     {
+        name: 'about',
         path: '/about',
         component: About
     },
     {
+        name: 'todos',
         path: '/todos',
-        component: TodoApp
+        redirect: '/todos/all', // /todos로 접속시 /todos/all로 다시 재접속 
+        component: TodoApp,
+        // 라우트 객체
+        children: [
+            {
+                name: 'todos-filter',
+                path: ':id' // 파라미터 설정
+            }
+        ]
     }
 ]
 

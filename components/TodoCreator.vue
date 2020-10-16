@@ -30,7 +30,8 @@ export default {
                 this.title = this.title.trim(); // 공백을 제거한 title을 this.title에 반환
                 return
             }
-            this.$emit('create-todo', this.title) // create-todo는 event 이름, 자식은 부모의 메서드를 가져올 수 없기 때문에 emit 이용(올려주는 개념)
+            // this.$emit('create-todo', this.title) create-todo는 event 이름, 자식은 부모의 메서드를 가져올 수 없기 때문에 emit 이용(올려주는 개념)
+            this.$store.dispatch('todoApp/createTodo', this.title)
             this.title = '';
 
             this.$nextTick(()=>{
