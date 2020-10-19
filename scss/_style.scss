@@ -19,6 +19,7 @@ body{
         align-items: center;
         margin-right: 12px;
         user-select: none;
+        pointer-events: none;
     }
     .btn{
         padding: 4px 12px;
@@ -154,7 +155,8 @@ body{
         font-size: 20px;
         border: none;
         flex-grow: 1;
-        font:inherit
+        font: inherit;
+        width: 100%;
     }
 }
 
@@ -213,4 +215,11 @@ body{
 }
 .to-home.router-link-exact-active{
     display: none;
+}
+@media (max-width: 780px){
+    .filters{
+        button{
+            font-size: 13px;
+        }
+    }
 }

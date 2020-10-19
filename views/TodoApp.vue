@@ -11,7 +11,7 @@
                 <router-link
                     to="active"
                     tag="button">
-                    해야 할 항목 ({{ activeCount }})
+                    해야할 항목 ({{ activeCount }})
                 </router-link>
                 <router-link
                     to="completed"
@@ -23,18 +23,18 @@
             <!-- 전체 선택 및 완료 항목 삭제 -->
             <div class="actions">
                 <label>
-                    <input 
+                    <input
                         v-model="allDone"
                         type="checkbox"/>
-                    <span 
+                    <span
                     class="icons"
                     @click="completeAll"><i class="material-icons">done_all</i></span>
                 </label>
                 <div>
-                    <button 
+                    <button
                     class="btn"
                     @click="scrollTop"><i class="material-icons">keyboard_arrow_up</i></button>
-                    <button 
+                    <button
                     class="btn"
                     @click="scrollBottom"><i class="material-icons">keyboard_arrow_down</i></button>
                     <button
@@ -46,7 +46,7 @@
 
         <!-- Todo 리스트 -->
         <div class="todo-app__list">
-            <todo-item 
+            <todo-item
                 v-for="todo in filteredTodos"
                 :key="todo.id"
                 :todo="todo"/>
@@ -63,65 +63,60 @@ import TodoCreator from '~/components/TodoCreator'
 import TodoItem from '../components/TodoItem'
 
 export default {
-    // 자식 컴포넌트
-    components: {
-        TodoCreator,
-        TodoItem
-    },
-    computed: {
-        ...mapState('todoApp', [
-            'todos'
-        ]),
-        ...mapGetters('todoApp',[
-            'total',
-            'activeCount',
-            'completedCount'
-        ]),
-        filteredTodos () {
-            switch(this.$route.params.id){
-                // 모든 항목
-                case 'all':
-                default:
-                    return this.todos
-                // 해야할 항목
-                case 'active':
-                    return this.todos.filter(todo => !todo.done);
-                // 완료된 항목
-                case 'completed':
-                    return this.todos.filter(todo => todo.done);
-            }
-        },
-        allDone: {
-            get(){
-                return this.total === this.completedCount && this.total > 0;
-            },
-            set(checked){
-                this.completeAll(checked)
-            }
-        }
-    },
-    // TodoApp.vue가 생성되고 나서 직후, 라이프사이클 훅
-    created () {
-        this.initDB();
-    },
-    methods: {
-        ...mapMutations('todoApp',[
-            'updateTodo'
-        ]),  
-        ...mapActions('todoApp',[
-            'initDB',
-            'completeAll',
-            'clearCompleted'
-        ]),
-        scrollTop(){
-            let todoWrap = document.querySelector('.todo-app-wrap');
-            todoWrap.scrollTo({top:0,left:0,behavior:'smooth'})
-        },
-        scrollBottom(){
-            let todoWrap = document.querySelector('.todo-app-wrap');
-            todoWrap.scrollTo({top:todoWrap.scrollHeight, left:0, behavior:'smooth'})
-        }
+  // 자식 컴포넌트
+  components: {
+    TodoCreator,
+    TodoItem
+  },
+  computed: {
+    ...mapState('todoApp', [
+      'todos'
+    ]),
+    ...mapGetters('todoApp', [
+      'total',
+      'activeCount',
+      'completedCount',
+      'filteredTodos'
+    ]),
+    allDone: {
+      get () {
+        return this.total === this.completedCount && this.total > 0
+      },
+      set (checked) {
+        this.completeAll(checked)
+      }
     }
+  },
+  // 특정 데이터를 감시하고 있다가 데이터가 변경되면 함수 실행
+  watch: {
+    $route () {
+      // state.filter = this.$route.params.id;
+      // this.$store.commit('todoApp/updateFilter',this.$route.params.id);
+      this.updateFilter(this.$route.params.id)
+    }
+  },
+  // TodoApp.vue가 생성되고 나서 직후, 라이프사이클 훅
+  created () {
+    this.initDB()
+  },
+  methods: {
+    ...mapMutations('todoApp', [
+      'updateFilter'
+    ]),
+    ...mapActions('todoApp', [
+      'initDB',
+      'completeAll',
+      'clearCompleted'
+    ]),
+    scrollTop () {
+      let todoWrap = document.querySelector('.todo-app-wrap')
+      todoWrap.scrollTo({ top: 0, left: 0, behavior: 'smooth' })
+    },
+    scrollBottom () {
+      let todoWrap = document.querySelector('.todo-app-wrap')
+      todoWrap.scrollTo({ top: todoWrap.scrollHeight, left: 0, behavior: 'smooth' })
+    }
+  }
 }
 </script>
 
